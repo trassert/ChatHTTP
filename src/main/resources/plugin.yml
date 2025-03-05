@@ -5,6 +5,9 @@ api-version: 1.21
 author: trassert
 description: Плагин, позволяющий отправлять чат по HTTP.
 commands:
-  c2h reload:
-    description: Перезагрузить конфиг / Reload config
-    usage: /c2h reload
+  c2h:
+    description: Управление плагином
+permissions:
+  c2h.reload:
+    description: "Разрешение на использование перезагрузки"
+    default: op

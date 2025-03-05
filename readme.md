@@ -16,6 +16,6 @@
 It uses HTTP-get to send messages.  
 On my server, it works in order to receive third-party currency for activity in the server chat.  
 
-Compilation:
-Install Maven and run
+Compilation:  
+Install Maven and run  
 `mvn clean package`
