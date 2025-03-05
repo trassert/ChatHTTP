@@ -1,0 +1,10 @@
+name: ChatToHttp
+version: 1.0
+main: com.example.chattohttp.ChatToHttpPlugin
+api-version: 1.21
+author: trassert
+description: Плагин, позволяющий отправлять чат по HTTP.
+commands:
+  c2h reload:
+    description: Перезагрузить конфиг / Reload config
+    usage: /c2h reload
