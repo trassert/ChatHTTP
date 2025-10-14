@@ -1,4 +1,4 @@
-package com.example.chattohttp;
+package com.example;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -64,8 +64,9 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
             String encodedNick = URLEncoder.encode(nick, StandardCharsets.UTF_8.toString());
             String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.toString());
 
-            String urlString = webhookUrl + "?nick=" + encodedNick + "&message=" + encodedMessage + "&password=" + password;
-            
+            String urlString = webhookUrl + "?nick=" + encodedNick + "&message=" + encodedMessage + "&password="
+                    + password;
+
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
