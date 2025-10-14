@@ -1,4 +1,4 @@
-package com.example;
+package com.example.chattohttp;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
