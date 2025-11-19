@@ -1,0 +1,99 @@
+name: Сборка
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+jobs:
+  extract-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+      artifact_name: ${{ steps.get_artifact_name.outputs.ARTIFACT_NAME }}
+      tag_exists: ${{ steps.check_tag.outputs.TAG_EXISTS }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PAT }}
+    - name: Get Maven version
+      id: get_version
+      run: |
+        VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Detected version: $VERSION"
+    - name: Get artifact name
+      id: get_artifact_name
+      run: |
+        ARTIFACT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+        echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+        echo "Detected artifact name: $ARTIFACT_NAME"
+    - name: Check if tag exists
+      id: check_tag
+      run: |
+        if git rev-parse "v${{ steps.get_version.outputs.VERSION }}" >/dev/null 2>&1; then
+          echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
+        else
+          echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
+        fi
+  build:
+    needs: extract-version
+    runs-on: ubuntu-latest
+    if: needs.extract-version.outputs.tag_exists == 'false'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - name: Build
+      run: mvn clean package
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ needs.extract-version.outputs.artifact_name }}-v${{ needs.extract-version.outputs.version }}
+        path: target/*.jar
+  create-tag:
+    needs: 
+      - extract-version
+      - build
+    runs-on: ubuntu-latest
+    if: needs.extract-version.outputs.tag_exists == 'false'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT }}
+        fetch-depth: 0
+    - name: Create tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag -a "v${{ needs.extract-version.outputs.version }}" -m "Release v${{ needs.extract-version.outputs.version }}"
+        git push origin "v${{ needs.extract-version.outputs.version }}"
+  release:
+    needs: 
+      - extract-version
+      - create-tag
+    runs-on: ubuntu-latest
+    if: needs.extract-version.outputs.tag_exists == 'false'
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ needs.extract-version.outputs.artifact_name }}-v${{ needs.extract-version.outputs.version }}
+    - name: Filter out original jars
+      run: |
+        find . -name "original-*.jar" -delete
+        echo "Removed original-*.jar files"
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.extract-version.outputs.version }}
+        name: v${{ needs.extract-version.outputs.version }}
+        files: "*.jar"  
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
