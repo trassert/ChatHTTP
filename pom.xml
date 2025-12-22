@@ -4,7 +4,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>ChatToHttp</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

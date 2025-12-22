@@ -134,7 +134,7 @@ jobs:
           name: v${{ needs.extract-version.outputs.version }}
           version: ${{ needs.extract-version.outputs.version }}
           version-type: release
-          changelog: Автоматический релиз v${{ needs.extract-version.outputs.version }}
+          changelog: ${{ needs.extract-version.outputs.changelog }}
 
           files: "**/*.jar"
 
