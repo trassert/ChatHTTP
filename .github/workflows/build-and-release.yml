@@ -22,8 +22,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
 
       - name: Get Maven version
         id: get_version
@@ -59,8 +59,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
 
       - name: Build
         run: mvn clean package
@@ -100,21 +100,20 @@ jobs:
           name: ${{ needs.extract-version.outputs.artifact_name }}-v${{ needs.extract-version.outputs.version }}
 
       - name: Remove original-*.jar
-        run: |
-          find . -name "original-*.jar" -delete
+        run: find . -name "original-*.jar" -delete
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.extract-version.outputs.version }}
           name: v${{ needs.extract-version.outputs.version }}
-          files: "*.jar"
+          files: "**/*.jar"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
   publish-modrinth:
-    needs: release
+    needs: [extract-version, release]
     runs-on: ubuntu-latest
     if: needs.extract-version.outputs.tag_exists == 'false'
     steps:
@@ -124,19 +123,22 @@ jobs:
           name: ${{ needs.extract-version.outputs.artifact_name }}-v${{ needs.extract-version.outputs.version }}
 
       - name: Remove original-*.jar
-        run: |
-          find . -name "original-*.jar" -delete
+        run: find . -name "original-*.jar" -delete
 
       - name: Publish to Modrinth
-        uses: modrinth-actions/publish@v2
+        uses: Kir-Antipov/mc-publish@v3.3
         with:
-          token: ${{ secrets.MODRINTH_TOKEN }}
-          project_id: k7ZA8q9y
+          modrinth-id: k7ZA8q9y
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          name: v${{ needs.extract-version.outputs.version }}
           version: ${{ needs.extract-version.outputs.version }}
-          version_type: release
-          changelog: "Автоматический релиз v${{ needs.extract-version.outputs.version }}"
-          files: "*.jar"
-          game_versions: |
+          version-type: release
+          changelog: Автоматический релиз v${{ needs.extract-version.outputs.version }}
+
+          files: "**/*.jar"
+
+          game-versions: |
             1.21.11
             1.21.10
             1.21.9
@@ -145,6 +147,7 @@ jobs:
             1.21.6
             1.21.5
             1.21.4
+
           loaders: |
             paper
             spigot
