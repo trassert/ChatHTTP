@@ -10,8 +10,9 @@ import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
 public class ChatToHttpPlugin extends JavaPlugin implements Listener {
@@ -29,22 +30,26 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("c2h")) {
-            if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
-                Player player = (Player) sender;
-                if (player.hasPermission("c2h.reload")) {
-                    reloadConfig();
-                    sender.sendMessage(getConfig().getString("config-reloaded"));
-                    return true;
-                } else {
-                    sender.sendMessage(getConfig().getString("no-permission-message"));
-                    return false;
-                }
-            } else {
-                sender.sendMessage(getConfig().getString("main-text"));
-            }
+        if (!command.getName().equalsIgnoreCase("c2h")) {
+            return false;
         }
-        return false;
+
+        if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Эта команда доступна только игрокам.");
+                return true;
+            }
+            if (!player.hasPermission("c2h.reload")) {
+                sender.sendMessage(getConfig().getString("no-permission-message", "Нет прав."));
+                return true;
+            }
+            reloadConfig();
+            sender.sendMessage(getConfig().getString("config-reloaded", "Конфиг перезагружен."));
+            return true;
+        } else {
+            sender.sendMessage(getConfig().getString("main-text", "Используйте /c2h reload"));
+            return true;
+        }
     }
 
     @Override
@@ -56,23 +61,36 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
+        if (webhookUrl == null || password == null) {
+            getLogger().warning("webhook-url или password не заданы в конфиге.");
+            return;
+        }
+
+        String nick = event.getPlayer().getName();
+        String message = event.getMessage();
+
+        String encodedNick = URLEncoder.encode(nick, StandardCharsets.UTF_8);
+        String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
+        String encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8);
+
+        String query = "nick=" + encodedNick + "&message=" + encodedMessage + "&password=" + encodedPassword;
 
         try {
-            String nick = event.getPlayer().getName();
-            String message = event.getMessage();
-
-            String encodedNick = URLEncoder.encode(nick, StandardCharsets.UTF_8.toString());
-            String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8.toString());
-
-            String urlString = webhookUrl + "?nick=" + encodedNick + "&message=" + encodedMessage + "&password="
-                    + password;
-
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            URI uri = new URI(webhookUrl + "?" + query);
+            HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
-            connection.getResponseCode();
-        } catch (IOException e) {
-            e.printStackTrace();
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(3000);
+            try {
+                int responseCode = connection.getResponseCode();
+                if (responseCode != 200) {
+                    getLogger().warning("Webhook returned code: " + responseCode);
+                }
+            } finally {
+                connection.disconnect();
+            }
+        } catch (URISyntaxException | IOException e) {
+            getLogger().warning("Не удалось отправить сообщение на webhook: " + e.getMessage());
         }
     }
 }
