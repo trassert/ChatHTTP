@@ -1,7 +1,7 @@
 name: ChatToHttp
 version: ${project.version}
 folia-supported: true
-main: com.example.chattohttp.ChatToHttpPlugin
+main: com.trassert.chattohttp.ChatToHttpPlugin
 api-version: 1.21
 author: trassert
 description: Плагин, позволяющий отправлять чат по HTTP.
