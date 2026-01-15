@@ -93,7 +93,43 @@ jobs:
     needs: [extract-version, create-tag]
     runs-on: ubuntu-latest
     if: needs.extract-version.outputs.tag_exists == 'false'
+    outputs:
+      changelog: ${{ steps.generate_changelog.outputs.CHANGELOG }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Generate changelog with commit links
+        id: generate_changelog
+        run: |
+          REPO="${{ github.repository }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 --exclude="v${{ needs.extract-version.outputs.version }}" HEAD~1 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --oneline --no-decorate)
+          else
+            COMMITS=$(git log "${PREV_TAG}..HEAD" --oneline --no-decorate)
+          fi
+
+          if [ -z "$COMMITS" ]; then
+            CHANGELOG="Нет изменений"
+          else
+            while IFS= read -r line; do
+              if [ -n "$line" ]; then
+                COMMIT_HASH=$(echo "$line" | cut -d' ' -f1)
+                COMMIT_MSG=$(echo "$line" | cut -d' ' -f2-)
+                echo "- [$COMMIT_HASH](https://github.com/$REPO/commit/$COMMIT_HASH) $COMMIT_MSG"
+              fi
+            done <<< "$COMMITS" > /tmp/changelog.md
+            CHANGELOG=$(cat /tmp/changelog.md)
+          fi
+
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -107,8 +143,8 @@ jobs:
         with:
           tag_name: v${{ needs.extract-version.outputs.version }}
           name: v${{ needs.extract-version.outputs.version }}
+          body: ${{ steps.generate_changelog.outputs.CHANGELOG }}
           files: "**/*.jar"
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 
@@ -134,19 +170,12 @@ jobs:
           name: v${{ needs.extract-version.outputs.version }}
           version: ${{ needs.extract-version.outputs.version }}
           version-type: release
-          changelog: Автоматический релиз v${{ needs.extract-version.outputs.version }}
+          changelog: ${{ needs.release.outputs.changelog }}
 
           files: "**/*.jar"
 
           game-versions: |
             1.21.11
-            1.21.10
-            1.21.9
-            1.21.8
-            1.21.7
-            1.21.6
-            1.21.5
-            1.21.4
 
           loaders: |
             paper
