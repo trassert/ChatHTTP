@@ -78,7 +78,7 @@ jobs:
         run: mvn -q clean package
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v8
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ needs.extract-version.outputs.artifact_name }}-v${{ needs.extract-version.outputs.version }}
           path: target/*.jar
