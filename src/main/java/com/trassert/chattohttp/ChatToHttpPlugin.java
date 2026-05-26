@@ -2,11 +2,15 @@ package com.trassert.chattohttp;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -25,11 +29,15 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
         saveDefaultConfig();
         reloadConfig();
         getServer().getPluginManager().registerEvents(this, this);
-        getCommand("c2h").setExecutor(this);
+        var command = getCommand("c2h");
+        if (command != null) {
+            command.setExecutor(this);
+        }
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label,
+            @NotNull String[] args) {
         if (!command.getName().equalsIgnoreCase("c2h")) {
             return false;
         }
@@ -60,14 +68,15 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
+    public void onPlayerChat(AsyncChatEvent event) {
         if (webhookUrl == null || password == null) {
             getLogger().warning("webhook-url или password не заданы в конфиге.");
             return;
         }
 
+        var serializer = PlainTextComponentSerializer.builder().build();
         String nick = event.getPlayer().getName();
-        String message = event.getMessage();
+        String message = serializer.serialize(event.message());
 
         String encodedNick = URLEncoder.encode(nick, StandardCharsets.UTF_8);
         String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
