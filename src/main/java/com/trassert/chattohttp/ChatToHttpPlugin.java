@@ -82,22 +82,27 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
         String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
         String encodedPassword = URLEncoder.encode(password, StandardCharsets.UTF_8);
 
-        String query = "nick=" + encodedNick + "&message=" + encodedMessage + "&password=" + encodedPassword;
+        String postData = "nick=" + encodedNick + "&message=" + encodedMessage + "&password=" + encodedPassword;
 
         try {
-            URI uri = new URI(webhookUrl + "?" + query);
+            URI uri = new URI(webhookUrl);
             HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setConnectTimeout(3000);
             connection.setReadTimeout(3000);
-            try {
-                int responseCode = connection.getResponseCode();
-                if (responseCode != 200) {
-                    getLogger().warning("Webhook returned code: " + responseCode);
-                }
-            } finally {
-                connection.disconnect();
+
+            try (var writer = new java.io.OutputStreamWriter(connection.getOutputStream())) {
+                writer.write(postData);
+                writer.flush();
             }
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                getLogger().warning("Webhook returned code: " + responseCode);
+            }
+            connection.disconnect();
         } catch (URISyntaxException | IOException e) {
             getLogger().warning("Не удалось отправить сообщение на webhook: " + e.getMessage());
         }
