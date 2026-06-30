@@ -6,22 +6,59 @@
 ![Commit Activity](https://img.shields.io/github/commit-activity/m/trassert/ChatHTTP?color=c78aff&label=commits&style=for-the-badge)
 ![Last Commit](https://img.shields.io/github/last-commit/trassert/ChatHTTP?color=c78aff&label=last%20commit&style=for-the-badge)
 
-## RU
-
-**Легковесный плагин (5 КБ), который может транслировать чат из вашего сервера.**  
-Он использует HTTP-get для того чтобы отправлять сообщения  
-На моём сервере он работает для того чтобы получать стороннюю валюту за актив в чате сервера.  
-
-Сборка:  
-Установите Maven и выполните  
-`mvn clean package`
+**[Русская версия README](readme-ru.md)**
 
 ## EN
 
-**Lightweight plugin (5 KB) that can stream chat from your server.**  
-It uses HTTP-get to send messages.  
-On my server, it works in order to receive third-party currency for activity in the server chat.  
+### What is this plugin?
 
-Compilation:  
+Intercepts player messages and sends them to the specified webhook URL via a POST request (parameters: `nick`, `message`, `password`).
+
+### How does it work?
+
+Intercepts player messages and sends them to the specified webhook URL via a POST request (parameters: nick, message, password).
+
+### Configuration `config.yml`
+
+```yaml
+webhook-url: "https://your-server/endpoint"
+password: "your_password"
+# optional: no-permission-message, config-reloaded, main-text
+```
+
+### Commands
+
+- `/c2h reload` — reload the config (requires `c2h.reload` permission).
+
+### Permissions
+
+- `c2h.reload` — access to reload.
+
+### Handling example
+
+Uses `aiohttp`
+
+```python
+async def minecraft(request: aiohttp.web.Request):
+    data = await request.post()
+    if data.get("password") != config.tokens.chattohttp:
+        logger.info("Invalid password")
+        return aiohttp.web.Response(text="Password is not valid", status=401)
+    nick = data.get("nick")
+    if not formatter.is_valid_mc_nick(nick):
+        return aiohttp.web.Response(text="Nick is not valid", status=406)
+    logger.info(f"{nick} said: {message}")
+    return aiohttp.web.Response(text="ok")
+```
+
+### Building
+
 Install Maven and run  
 `mvn clean package`
+
+### Versioning
+
+The plugin uses SemVer - `<major>.<minor>.<patch>`
+- **major** - incompatible changes
+- **minor** - compatible feature changes
+- **patch** - non-functional changes (bugfixes)
