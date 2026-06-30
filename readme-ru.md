@@ -6,6 +6,9 @@
 ![Commit Activity](https://img.shields.io/github/commit-activity/m/trassert/ChatHTTP?color=c78aff&label=commits&style=for-the-badge)
 ![Last Commit](https://img.shields.io/github/last-commit/trassert/ChatHTTP?color=c78aff&label=last%20commit&style=for-the-badge)
 
+![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Spigot-blue?style=for-the-badge&logo=spigotmc)
+![VSC](https://img.shields.io/badge/Made%20in-VSCode-blue?style=for-the-badge&logo=vscodium)
+
 ## RU
 
 ### Что это за плагин?

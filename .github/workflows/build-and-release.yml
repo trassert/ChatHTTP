@@ -189,6 +189,7 @@ jobs:
 
           game-versions: |
             26.1.2
+            26.2
 
           loaders: |
             paper
