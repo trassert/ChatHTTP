@@ -69,6 +69,7 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
             if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
                 targetUrl = "http://" + targetUrl;
             }
+            final String finalUrl = targetUrl;
 
             StringBuilder jsonBuilder = new StringBuilder();
             for (int i = 2; i < args.length; i++) {
@@ -77,11 +78,11 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
                     jsonBuilder.append(" ");
                 }
             }
-            String jsonBody = jsonBuilder.toString();
+            final String jsonBody = jsonBuilder.toString();
 
             getServer().getScheduler().runTaskAsynchronously(this, () -> {
                 try {
-                    URI uri = new URI(targetUrl);
+                    URI uri = new URI(finalUrl);
                     HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
                     connection.setRequestMethod("POST");
                     connection.setDoOutput(true);
@@ -115,10 +116,10 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
                         resultMsg = responseCode + ": " + responseBody;
                     }
                     
-                    getServer().getScheduler().runTask(this, () -> sender.sendMessage(resultMsg));
+                    getServer().getScheduler().runTask(ChatToHttpPlugin.this, () -> sender.sendMessage(resultMsg));
                 } catch (Exception e) {
                     String errorMsg = "Ошибка: " + e.getMessage();
-                    getServer().getScheduler().runTask(this, () -> sender.sendMessage(errorMsg));
+                    getServer().getScheduler().runTask(ChatToHttpPlugin.this, () -> sender.sendMessage(errorMsg));
                 }
             });
 
