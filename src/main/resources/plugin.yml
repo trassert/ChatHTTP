@@ -12,3 +12,6 @@ permissions:
   c2h.reload:
     description: "Разрешение на использование перезагрузки"
     default: op
+  c2h.send:
+    description: "Разрешение на использование отправки на хуки"
+    default: op

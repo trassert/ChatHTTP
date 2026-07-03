@@ -12,12 +12,15 @@ import org.jspecify.annotations.NonNull;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class ChatToHttpPlugin extends JavaPlugin implements Listener {
 
@@ -54,10 +57,76 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
             reloadConfig();
             sender.sendMessage(getConfig().getString("config-reloaded", "Конфиг перезагружен."));
             return true;
-        } else {
-            sender.sendMessage(getConfig().getString("main-text", "Используйте /c2h reload"));
+        } 
+        
+        if (args.length >= 3 && args[0].equalsIgnoreCase("send")) {
+            if (sender instanceof Player player && !player.hasPermission("c2h.send")) {
+                sender.sendMessage(getConfig().getString("no-permission-message", "Нет прав."));
+                return true;
+            }
+
+            String targetUrl = args[1];
+            if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+                targetUrl = "http://" + targetUrl;
+            }
+
+            StringBuilder jsonBuilder = new StringBuilder();
+            for (int i = 2; i < args.length; i++) {
+                jsonBuilder.append(args[i]);
+                if (i < args.length - 1) {
+                    jsonBuilder.append(" ");
+                }
+            }
+            String jsonBody = jsonBuilder.toString();
+
+            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+                try {
+                    URI uri = new URI(targetUrl);
+                    HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                    connection.setConnectTimeout(3000);
+                    connection.setReadTimeout(3000);
+
+                    try (var writer = new java.io.OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8)) {
+                        writer.write(jsonBody);
+                        writer.flush();
+                    }
+
+                    int responseCode = connection.getResponseCode();
+                    String responseBody = "";
+                    
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(
+                                responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), 
+                                StandardCharsets.UTF_8))) {
+                        responseBody = reader.lines().collect(Collectors.joining("\n"));
+                    } catch (Exception e) {
+                        responseBody = e.getMessage();
+                    }
+                    
+                    connection.disconnect();
+                    
+                    String resultMsg;
+                    if (responseCode >= 200 && responseCode < 300) {
+                        resultMsg = "ok";
+                    } else {
+                        resultMsg = responseCode + ": " + responseBody;
+                    }
+                    
+                    getServer().getScheduler().runTask(this, () -> sender.sendMessage(resultMsg));
+                } catch (Exception e) {
+                    String errorMsg = "Ошибка: " + e.getMessage();
+                    getServer().getScheduler().runTask(this, () -> sender.sendMessage(errorMsg));
+                }
+            });
+
             return true;
         }
+
+        sender.sendMessage(getConfig().getString("main-text", "Используйте /c2h reload или /c2h send <url> <json>"));
+        return true;
     }
 
     @Override
