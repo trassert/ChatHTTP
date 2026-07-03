@@ -30,10 +30,12 @@ password: "ваш_пароль"
 ### Команды
 
 - `/c2h reload` — перезагрузить конфиг (требуется право `c2h.reload`).
+- `/c2h send айпи json` - отправить POST (требуется `c2h.send`)
 
 ### Права
 
 - `c2h.reload` — доступ к перезагрузке.
+- `c2h.send` - доступ к `/c2h send`
 
 ### Пример обработки
 
@@ -46,6 +48,7 @@ async def minecraft(request: aiohttp.web.Request):
         logger.info("Неверный пароль")
         return aiohttp.web.Response(text="Password is not valid", status=401)
     nick = data.get("nick")
+    message = data.get("message")
     if not formatter.is_valid_mc_nick(nick):
         return aiohttp.web.Response(text="Nick is not valid", status=406)
     logger.info(f"{nick} сказал: {message}")

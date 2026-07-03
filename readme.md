@@ -31,11 +31,13 @@ password: "your_password"
 
 ### Commands
 
-- `/c2h reload` — reload the config (requires `c2h.reload` permission).
+- `/c2h reload` - reload the config (requires `c2h.reload` permission).
+- `/c2h send ip json` - send post (requires `c2h.send` permission).
 
 ### Permissions
 
-- `c2h.reload` — access to reload.
+- `c2h.reload` - access to reload.
+- `c2h.send` - access to /c2h send
 
 ### Handling example
 
@@ -48,6 +50,7 @@ async def minecraft(request: aiohttp.web.Request):
         logger.info("Invalid password")
         return aiohttp.web.Response(text="Password is not valid", status=401)
     nick = data.get("nick")
+    message = data.get("message")
     if not formatter.is_valid_mc_nick(nick):
         return aiohttp.web.Response(text="Nick is not valid", status=406)
     logger.info(f"{nick} said: {message}")
