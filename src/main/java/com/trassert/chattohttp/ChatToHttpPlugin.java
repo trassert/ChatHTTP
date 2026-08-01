@@ -1,26 +1,24 @@
 package com.trassert.chattohttp;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
-
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class ChatToHttpPlugin extends JavaPlugin implements Listener {
 
@@ -39,8 +37,12 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
     }
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label,
-            @NotNull String[] args) {
+    public boolean onCommand(
+        @NonNull CommandSender sender,
+        @NonNull Command command,
+        @NonNull String label,
+        @NotNull String[] args
+    ) {
         if (!command.getName().equalsIgnoreCase("c2h")) {
             return false;
         }
@@ -57,8 +59,8 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
             reloadConfig();
             sender.sendMessage(getConfig().getString("config-reloaded", "Конфиг перезагружен."));
             return true;
-        } 
-        
+        }
+
         if (args.length >= 3 && args[0].equalsIgnoreCase("send")) {
             if (sender instanceof Player player && !player.hasPermission("c2h.send")) {
                 sender.sendMessage(getConfig().getString("no-permission-message", "Нет прав."));
@@ -90,32 +92,35 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
                     connection.setConnectTimeout(3000);
                     connection.setReadTimeout(3000);
 
-                    try (var writer = new java.io.OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8)) {
+                    try (var writer =
+                        new java.io.OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8)) {
                         writer.write(jsonBody);
                         writer.flush();
                     }
 
                     int responseCode = connection.getResponseCode();
                     String responseBody = "";
-                    
+
                     try (BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(
-                                responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(), 
-                                StandardCharsets.UTF_8))) {
+                        new InputStreamReader(
+                            responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream(),
+                            StandardCharsets.UTF_8
+                        )
+                    )) {
                         responseBody = reader.lines().collect(Collectors.joining("\n"));
                     } catch (Exception e) {
                         responseBody = e.getMessage();
                     }
-                    
+
                     connection.disconnect();
-                    
+
                     String resultMsg;
                     if (responseCode >= 200 && responseCode < 300) {
                         resultMsg = "ok";
                     } else {
                         resultMsg = responseCode + ": " + responseBody;
                     }
-                    
+
                     getServer().getScheduler().runTask(ChatToHttpPlugin.this, () -> sender.sendMessage(resultMsg));
                 } catch (Exception e) {
                     String errorMsg = "Ошибка: " + e.getMessage();
