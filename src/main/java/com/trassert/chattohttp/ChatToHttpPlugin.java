@@ -41,7 +41,7 @@ public class ChatToHttpPlugin extends JavaPlugin implements Listener {
         @NonNull CommandSender sender,
         @NonNull Command command,
         @NonNull String label,
-        @NotNull String[] args
+        @SuppressWarnings("null") @NotNull String[] args
     ) {
         if (!command.getName().equalsIgnoreCase("c2h")) {
             return false;
