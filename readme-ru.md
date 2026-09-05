@@ -1,13 +1,10 @@
-### C2HTTP plugin
+# C2HTTP plugin
 
-![Issues](https://img.shields.io/github/issues-raw/trassert/ChatHTTP?color=c78aff&label=issues&style=for-the-badge)
-![Contributors](https://img.shields.io/github/contributors/trassert/ChatHTTP?color=c78aff&label=contributors&style=for-the-badge)
-![Lines](https://img.shields.io/endpoint?url=https://ghloc.vercel.app/api/trassert/ChatHTTP/badge?style=flat&logoColor=white&color=c78aff&style=for-the-badge)
-![Commit Activity](https://img.shields.io/github/commit-activity/m/trassert/ChatHTTP?color=c78aff&label=commits&style=for-the-badge)
-![Last Commit](https://img.shields.io/github/last-commit/trassert/ChatHTTP?color=c78aff&label=last%20commit&style=for-the-badge)
-
-![Platform](https://img.shields.io/badge/Platform-Paper%20%7C%20Spigot-blue?style=for-the-badge&logo=spigotmc)
-![VSC](https://img.shields.io/badge/Made%20in-VSCode-blue?style=for-the-badge&logo=vscodium)
+<p align="center">
+<a href=https://t.me/lumintoch><img src=https://img.shields.io/badge/Sponsored%20by-Luminto-purple?style=for-the-badge&logo=githubsponsors&logoColor=white></a>
+<img src="https://img.shields.io/badge/Paper-blue?style=for-the-badge&logo=spigotmc&logoColor=white&logoSize=auto" alt="Badge">
+<img src="https://img.shields.io/badge/Java-orange?style=for-the-badge&logo=openjdk&logoSize=auto" alt="Badge">
+</p>
 
 ## RU
 
