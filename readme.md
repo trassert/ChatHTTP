@@ -27,12 +27,10 @@ password: "your_password"
 ### Commands
 
 - `/c2h reload` - reload the config (requires `c2h.reload` permission).
-- `/c2h send ip json` - send post (requires `c2h.send` permission).
 
 ### Permissions
 
 - `c2h.reload` - access to reload.
-- `c2h.send` - access to /c2h send
 
 ### Handling example
 
