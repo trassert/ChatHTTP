@@ -2,16 +2,13 @@ name: ChatToHttp
 version: ${project.version}
 folia-supported: true
 main: com.trassert.chattohttp.ChatToHttpPlugin
-api-version: "26.1.2"
+api-version: "1.20"
 author: trassert
 description: Плагин, позволяющий отправлять чат по HTTP.
 commands:
   c2h:
-    description: Управление плагином
+    description: Plugin info
 permissions:
   c2h.reload:
-    description: "Разрешение на использование перезагрузки"
-    default: op
-  c2h.send:
-    description: "Разрешение на использование отправки на хуки"
+    description: Reload config
     default: op

@@ -1,6 +1,6 @@
 webhook-url: "http://example.com/api"
 password: "your_password"
 
-config-reloaded: "&l&6(C2H) §7Конфигурация успешно перезагружена!"
-no-permission-message: "&l&6(C2H) §cУ вас нет разрешения использовать это."
-main-text: "&l&6(C2H) §7Плагин C2HTTP. Автор: @trassert"
+config-reloaded: "&l&6(C2H) §7Configuration successfully reloaded!"
+no-permission-message: "&l&6(C2H) §cYou don't have permission to use this."
+main-text: "&l&6(C2H) §7C2HTTP plugin. Author: @trassert"
